@@ -1,0 +1,58 @@
+import sqlite3
+from datetime import datetime
+
+
+conn = sqlite3.connect("medical_data.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS patients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    symptoms TEXT,
+    diagnosis TEXT,
+    date TEXT
+)
+""")
+conn.commit()
+
+
+def diagnose(symptoms):
+    symptoms = symptoms.lower()
+
+    if "fever" in symptoms and "cough" in symptoms:
+        return "You may have Viral Fever or Flu."
+
+    elif "headache" in symptoms and "nausea" in symptoms:
+        return "Possible Migraine."
+
+    elif "stomach pain" in symptoms and "vomiting" in symptoms:
+        return "Possible Food Poisoning."
+
+    elif "chest pain" in symptoms:
+        return "Heart-related issue. Seek doctor immediately."
+
+    else:
+        return "No clear diagnosis. Provide more symptoms."
+
+
+name = input("Enter patient name: ")
+sym = input("Enter symptoms: ")
+
+result = diagnose(sym)
+
+print("\n--- DIAGNOSIS RESULT ---")
+print("Patient:", name)
+print("Symptoms:", sym)
+print("Diagnosis:", result)
+
+
+cursor.execute("""
+INSERT INTO patients(name, symptoms, diagnosis, date)
+VALUES (?, ?, ?, ?)
+""", (name, sym, result, datetime.now().strftime("%Y-%m-%d %H:%M")))
+
+conn.commit()
+conn.close()
+
+print("\nData saved successfully in backend (medical_data.db) ✔")
